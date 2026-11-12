@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atie-flow-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: atie
+      POSTGRES_PASSWORD: atie
+      POSTGRES_DB: atie_flow
+    volumes:
+      - atie_flow_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atie -d atie_flow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  atie_flow_pg:
