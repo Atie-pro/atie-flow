@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Lint, tipos, migraciones y pruebas
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: atie
+          POSTGRES_PASSWORD: atie
+          POSTGRES_DB: atie_flow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atie -d atie_flow"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://atie:atie@localhost:5432/atie_flow
+      BETTER_AUTH_SECRET: ci-atie-flow-secreto-local-no-es-produccion-0001
+      BETTER_AUTH_URL: http://localhost:3000
+      SEED_ADMIN_EMAIL: admin@atie.com.ec
+      SEED_ADMIN_NAME: Admin ATIE
+      SEED_ADMIN_PASSWORD: atie-dev-cambiar
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Aplicar migraciones
+        run: pnpm db:deploy
+
+      - name: Sembrar datos de desarrollo
+        run: pnpm db:seed
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Comprobar tipos
+        run: pnpm typecheck
+
+      - name: Pruebas unitarias
+        run: pnpm test
+
+      - name: Instalar Chromium para Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Compilar
+        run: pnpm build
+
+      - name: Prueba de extremo a extremo
+        run: pnpm test:e2e
