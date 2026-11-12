@@ -157,4 +157,4 @@ La protección de rutas está en `src/middleware.ts`: sin cookie de sesión, cua
 - **Acceso de clientes.** El MVP asume solo equipo interno. El rol `CLIENTE` existe en el modelo, sin invitación ni permisos todavía.
 - **Inicio de sesión corporativo.** Google y Microsoft están preparados en la configuración y apagados. Falta decidir el proveedor y registrar la aplicación.
 - **Presupuesto.** Sin cuentas ni servicios de pago creados desde este repositorio.
-- **Protección de la rama `main`.** Debe exigir pull request y el CI en verde antes de integrar. Si el token con el que se armó este sprint no tiene permiso de administración, queda como tarea de un administrador del repositorio de GitHub. El estado concreto está en la descripción del pull request del sprint 0.
+- **Protección de la rama `main`.** Debe exigir pull request y el CI en verde antes de integrar. En este sprint no se pudo configurar: el token del agente no tiene permiso de administración y la API de protección de ramas responde 403. Queda como tarea de un administrador de `Atie-pro/atie-flow`.
